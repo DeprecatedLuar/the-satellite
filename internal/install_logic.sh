@@ -183,7 +183,7 @@ stop_running_instance() {
 
     # Zombies can't be killed, they'll be reaped by parent eventually
     if [ -n "$zombie_pids" ]; then
-        warn "Zombie processes detected (PIDs:$zombie_pids). These are harmless and will be cleaned up automatically."
+        warn "You got some zombie processes (PIDs:$zombie_pids). Nothing to worry though."
     fi
 }
 
