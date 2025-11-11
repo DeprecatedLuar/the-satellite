@@ -2,7 +2,19 @@
 
 set -e
 
-# Source all internal modules
+# Bootstrap: If piped via curl, download full satellite and re-exec
+if [[ -z "${BASH_SOURCE[0]}" ]] || [[ "${BASH_SOURCE[0]}" == "bash" ]] || [[ "${BASH_SOURCE[0]}" == "/dev/fd/"* ]]; then
+    TEMP_DIR=$(mktemp -d)
+
+    # Download the-satellite repository as tarball
+    curl -sSL https://github.com/DeprecatedLuar/the-satellite/archive/refs/heads/main.tar.gz | \
+        tar -xz -C "$TEMP_DIR" --strip-components=1
+
+    # Re-execute from extracted location with all original arguments
+    exec bash "$TEMP_DIR/satellite.sh" "$@"
+fi
+
+# Now running from extracted location, can source internal modules
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 source "$SCRIPT_DIR/internal/messages.sh"

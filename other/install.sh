@@ -45,15 +45,9 @@ case "${1:-}" in
         echo "Installed to $INSTALL_DIR/$BINARY_NAME"
         ;;
 
-    check-update)
-        # Call satellite for update checking
-        curl -sSL https://raw.githubusercontent.com/$REPO_USER/satellite/main/satellite.sh | \
-            bash -s -- check-update "$2" "$REPO_USER" "$REPO_NAME"
-        ;;
-
     *)
         # Standard installation via satellite
-        curl -sSL https://raw.githubusercontent.com/$REPO_USER/satellite/main/satellite.sh | \
+        curl -sSL https://raw.githubusercontent.com/$REPO_USER/the-satellite/main/satellite.sh | \
             bash -s -- install \
                 "$PROJECT_NAME" \
                 "$BINARY_NAME" \
