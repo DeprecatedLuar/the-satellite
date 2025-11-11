@@ -126,26 +126,64 @@ build_from_source() {
 stop_running_instance() {
     local binary_name="$1"
 
-    if pgrep -x "$binary_name" > /dev/null 2>&1; then
+    # Find all processes with exact binary name match
+    local all_pids=$(pgrep -x "$binary_name" 2>/dev/null || true)
+
+    if [ -z "$all_pids" ]; then
+        return 0
+    fi
+
+    # Separate zombies from running processes
+    local running_pids=""
+    local zombie_pids=""
+
+    for pid in $all_pids; do
+        local state=$(ps -o stat= -p "$pid" 2>/dev/null | sed 's/[^A-Z]//g')
+        if [[ "$state" == *"Z"* ]]; then
+            zombie_pids="$zombie_pids $pid"
+        else
+            running_pids="$running_pids $pid"
+        fi
+    done
+
+    # Kill running processes
+    if [ -n "$running_pids" ]; then
         action "Stopping running instance..."
 
-        # Try graceful shutdown (SIGTERM)
-        pkill -TERM -x "$binary_name" 2>/dev/null
+        for pid in $running_pids; do
+            kill -TERM "$pid" 2>/dev/null || true
+        done
 
         # Wait for clean exit (timeout: 5 seconds)
         for i in {1..10}; do
             sleep 0.5
-            if ! pgrep -x "$binary_name" > /dev/null 2>&1; then
+            local still_running=""
+            for pid in $running_pids; do
+                if ps -p "$pid" > /dev/null 2>&1; then
+                    local state=$(ps -o stat= -p "$pid" 2>/dev/null | sed 's/[^A-Z]//g')
+                    if [[ "$state" != *"Z"* ]]; then
+                        still_running="$still_running $pid"
+                    fi
+                fi
+            done
+
+            if [ -z "$still_running" ]; then
                 success "Process stopped"
-                break
+                return 0
             fi
+            running_pids="$still_running"
         done
 
-        # If still running, fail gracefully
-        if pgrep -x "$binary_name" > /dev/null 2>&1; then
+        # If still running after timeout, error
+        if [ -n "$running_pids" ]; then
             echo ""
-            error "Failed to stop running $binary_name. Please stop it manually and try again."
+            error "Failed to stop running $binary_name (PIDs:$running_pids). Please stop it manually and try again."
         fi
+    fi
+
+    # Zombies can't be killed, they'll be reaped by parent eventually
+    if [ -n "$zombie_pids" ]; then
+        warn "Zombie processes detected (PIDs:$zombie_pids). These are harmless and will be cleaned up automatically."
     fi
 }
 
