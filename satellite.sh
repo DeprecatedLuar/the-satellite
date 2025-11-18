@@ -148,6 +148,14 @@ case "$1" in
                 ;;
         esac
         ;;
+    init-workspace)
+        # Usage: satellite.sh init-workspace
+        # Sources paths from bash config first
+        if [ -f "$HOME/.config/bash/modules/universal/paths.sh" ]; then
+            source "$HOME/.config/bash/modules/universal/paths.sh"
+        fi
+        bash "$SCRIPT_DIR/cargo-bay/init-workspace.sh"
+        ;;
     *)
         error "Unknown command: $1"
         ;;
