@@ -10,13 +10,8 @@ build/
 *.exe
 dist/
 build/
-
-# Whitelist
-!README.md
-!LICENCE
-!LICENSE
-!cmd/*
-
+_*
+!__*
 
 # IDE files
 .vscode/
@@ -38,6 +33,8 @@ Thumbs.db
 # Purpose and planning files
 *.purpose.md
 .purpose.md
+readme.reference.md
+README-draft.md
 vision.md
 CLAUDE.md
 other/blueprint/
@@ -46,58 +43,8 @@ implementation-history.md
 .env
 *doc.md
 doc.md
-README-*
 
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-.venv/
-venv/
-ENV/
-env/
-*.egg-info/
-dist/
-build/
-
-# Virtual environment
-.venv/
-venv/
-
-# Nix
-result
-result-*
-
-# Audio files
-*.wav
-*.mp3
-*.ogg
-
-# Model cache
-~/.cache/whisper/
-.cache/
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
-
-# Test files
-test.py
-test-*.py
-_*
-
-# Temporary files
-tmp/
-temp/
+# Whitelist
+!README.md
+!LICENCE
+!LICENSE

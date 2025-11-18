@@ -22,6 +22,7 @@ source "$SCRIPT_DIR/internal/os_detection.sh"
 source "$SCRIPT_DIR/internal/path_utils.sh"
 source "$SCRIPT_DIR/internal/updater.sh"
 source "$SCRIPT_DIR/internal/install_logic.sh"
+source "$SCRIPT_DIR/cargo-bay/package_manager.sh"
 
 # Command dispatcher
 case "$1" in
@@ -89,6 +90,63 @@ case "$1" in
             echo ""
             info "$MSG_FINAL"
         fi
+        ;;
+    install-packages)
+        # Usage: satellite.sh install-packages <category>
+        # Categories: universal, dev-tools, all
+        CATEGORY="$2"
+
+        # Detect package manager
+        SYSTEM_INFO=$(get_system_info)
+        OS=$(echo "$SYSTEM_INFO" | grep -o '"os": "[^"]*"' | cut -d'"' -f4)
+
+        # Determine package manager based on OS
+        case "$OS" in
+            ubuntu|debian)
+                PKG_MGR="apt"
+                ;;
+            alpine)
+                PKG_MGR="apk"
+                ;;
+            termux)
+                PKG_MGR="pkg"
+                ;;
+            *)
+                # Try to detect by command availability
+                if command -v apk &> /dev/null; then
+                    PKG_MGR="apk"
+                elif command -v apt &> /dev/null; then
+                    PKG_MGR="apt"
+                elif command -v pkg &> /dev/null; then
+                    PKG_MGR="pkg"
+                else
+                    error "Unsupported package manager"
+                    exit 1
+                fi
+                ;;
+        esac
+
+        # Get and install packages
+        case "$CATEGORY" in
+            universal)
+                PACKAGES=$(get_packages "universal" "$PKG_MGR")
+                install_packages "$PKG_MGR" $PACKAGES
+                ;;
+            dev-tools)
+                PACKAGES=$(get_packages "dev-tools" "$PKG_MGR")
+                install_packages "$PKG_MGR" $PACKAGES
+                ;;
+            all)
+                UNIVERSAL_PKGS=$(get_packages "universal" "$PKG_MGR")
+                DEV_PKGS=$(get_packages "dev-tools" "$PKG_MGR")
+                install_packages "$PKG_MGR" $UNIVERSAL_PKGS $DEV_PKGS
+                ;;
+            *)
+                error "Unknown category: $CATEGORY"
+                error "Usage: satellite.sh install-packages [universal|dev-tools|all]"
+                exit 1
+                ;;
+        esac
         ;;
     *)
         error "Unknown command: $1"
