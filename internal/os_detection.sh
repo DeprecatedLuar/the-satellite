@@ -78,6 +78,12 @@ detect_distro() {
         return
     fi
 
+    # Check for Termux (Android environment)
+    if [[ -n "$TERMUX_VERSION" ]] || [[ -d "/data/data/com.termux" ]]; then
+        echo "termux"
+        return
+    fi
+
     if is_nixos; then
         echo "nixos"
         return

@@ -98,11 +98,11 @@ case "$1" in
 
         # Detect package manager
         SYSTEM_INFO=$(get_system_info)
-        OS=$(echo "$SYSTEM_INFO" | grep -o '"os": "[^"]*"' | cut -d'"' -f4)
+        DISTRO=$(echo "$SYSTEM_INFO" | grep -o '"distro": "[^"]*"' | cut -d'"' -f4)
 
-        # Determine package manager based on OS
-        case "$OS" in
-            ubuntu|debian)
+        # Determine package manager based on distro
+        case "$DISTRO" in
+            ubuntu|debian|pop|linuxmint|raspbian)
                 PKG_MGR="apt"
                 ;;
             alpine)
