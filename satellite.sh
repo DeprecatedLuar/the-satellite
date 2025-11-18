@@ -22,7 +22,7 @@ source "$SCRIPT_DIR/internal/os_detection.sh"
 source "$SCRIPT_DIR/internal/path_utils.sh"
 source "$SCRIPT_DIR/internal/updater.sh"
 source "$SCRIPT_DIR/internal/install_logic.sh"
-source "$SCRIPT_DIR/cargo-bay/package_manager.sh"
+source "$SCRIPT_DIR/cargo-bay/package-managers/common.sh"
 
 # Command dispatcher
 case "$1" in
