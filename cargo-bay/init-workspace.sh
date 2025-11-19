@@ -33,6 +33,7 @@ mkdir -p "$DOCKER_DIR"
 # Create ~/bin directory structure
 mkdir -p "$HOME/bin"
 mkdir -p "$HOME/bin/lib"
+mkdir -p "$HOME/bin/sys"
 
 # Create convenience symlink
 ln -sf "$HOME/.local/bin" "$HOME/bin/local"

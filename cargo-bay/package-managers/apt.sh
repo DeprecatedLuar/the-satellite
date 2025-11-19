@@ -29,7 +29,7 @@ get_apt_packages() {
             echo "curl wget git zoxide ranger micro visidata starship ncdu btop zerotier-one exa"
             ;;
         dev-tools)
-            echo "golang-go nodejs"
+            echo "golang-go nodejs cargo"
             ;;
     esac
 }

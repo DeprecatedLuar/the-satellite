@@ -34,7 +34,7 @@ get_pkg_packages() {
             echo "termux-tools git curl wget openssh zoxide ranger micro visidata starship ncdu btop zerotier-one exa"
             ;;
         dev-tools)
-            echo "nodejs-lts python golang"
+            echo "nodejs-lts python golang rust"
             ;;
     esac
 }

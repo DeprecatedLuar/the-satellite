@@ -43,7 +43,7 @@ get_apk_packages() {
             echo "curl wget git zoxide ranger micro visidata starship ncdu btop exa"
             ;;
         dev-tools)
-            echo "go nodejs"
+            echo "go nodejs cargo rust"
             ;;
     esac
 }
