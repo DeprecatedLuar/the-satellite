@@ -48,3 +48,5 @@ doc.md
 !README.md
 !LICENCE
 !LICENSE
+!shell.nix
+!.gitignore
