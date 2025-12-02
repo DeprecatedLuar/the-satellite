@@ -12,6 +12,7 @@ sat_run_all \
     wget \
     git \
     openssh \
+    sensors \
     zoxide \
     ranger \
     micro \
