@@ -11,6 +11,7 @@ sat_run_all \
     curl \
     wget \
     git \
+    openssh \
     zoxide \
     ranger \
     micro \
