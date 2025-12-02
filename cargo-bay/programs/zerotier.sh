@@ -24,14 +24,19 @@ case "$DISTRO" in
                 ARCH=$(uname -m)
                 case "$ARCH" in
                     x86_64)         ARCH_NAME="x86_64" ;;
-                    aarch64|arm64)  ARCH_NAME="arm64" ;;
-                    armv7*|armhf)   ARCH_NAME="arm" ;;
+                    aarch64|arm64)  ARCH_NAME="aarch64" ;;
                     *)              error "Unsupported architecture: $ARCH" ;;
                 esac
 
-                curl -fsSL -o /tmp/zerotier-one \
-                    "https://github.com/crystalidea/zerotier-linux-binaries/releases/latest/download/zerotier-one-${ARCH_NAME}"
-                chmod +x /tmp/zerotier-one
+                # Get latest version from CrystalIDEA releases
+                VERSION=$(curl -sSL "https://api.github.com/repos/crystalidea/zerotier-linux-binaries/releases/latest" \
+                    | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+
+                curl -fsSL -o /tmp/zerotier.tar.gz \
+                    "https://github.com/crystalidea/zerotier-linux-binaries/releases/download/${VERSION}/zerotier_${ARCH_NAME}_${VERSION}.tar.gz"
+
+                tar -xzf /tmp/zerotier.tar.gz -C /tmp
+                rm /tmp/zerotier.tar.gz
 
                 sudo mv /tmp/zerotier-one /usr/local/bin/
                 sudo ln -sf /usr/local/bin/zerotier-one /usr/local/bin/zerotier-cli
