@@ -40,7 +40,7 @@ get_apk_packages() {
     case "$category" in
         universal)
             # Note: zerotier-one not available in Alpine repos (must compile from source)
-            echo "curl wget git zoxide ranger micro visidata starship ncdu btop exa"
+            echo "curl wget git zoxide ranger micro visidata starship ncdu btop exa lm-sensors"
             ;;
         dev-tools)
             echo "go nodejs cargo rust"

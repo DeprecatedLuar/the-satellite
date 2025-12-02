@@ -26,7 +26,7 @@ get_apt_packages() {
 
     case "$category" in
         universal)
-            echo "curl wget git zoxide ranger micro visidata starship ncdu btop zerotier-one exa"
+            echo "curl wget git zoxide ranger micro visidata starship ncdu btop zerotier-one exa lm-sensors"
             ;;
         dev-tools)
             echo "golang-go nodejs cargo"
