@@ -1,22 +1,20 @@
 #!/usr/bin/env bash
 # Essentials: core tools for a productive shell environment
+set -e
 
-SAT_BASE="https://raw.githubusercontent.com/DeprecatedLuar/the-satellite/main"
+# Bootstrap fetcher
+eval "$(curl -sSL https://raw.githubusercontent.com/DeprecatedLuar/the-satellite/main/internal/fetcher.sh)"
+sat_init
 
-ESSENTIALS=(
-    curl
-    wget
-    git
-    zoxide
-    ranger
-    micro
-    btop
-    ncdu
-    exa
+# Install essentials
+sat_run_all \
+    curl \
+    wget \
+    git \
+    zoxide \
+    ranger \
+    micro \
+    btop \
+    ncdu \
+    exa \
     starship
-)
-
-for prog in "${ESSENTIALS[@]}"; do
-    WRAPPER_URL="$SAT_BASE/cargo-bay/programs/${prog}.sh"
-    curl -sSL "$WRAPPER_URL" | bash
-done
