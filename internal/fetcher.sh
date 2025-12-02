@@ -17,7 +17,10 @@ sat_init() {
     mkdir -p "$SAT_DIR/internal" "$SAT_DIR/cargo-bay/programs"
 
     for file in "${SAT_CORE[@]}"; do
-        curl -sSL "$SAT_REMOTE/$file" -o "$SAT_DIR/$file"
+        if ! curl -sSL --fail "$SAT_REMOTE/$file" -o "$SAT_DIR/$file"; then
+            echo "Failed to fetch $file" >&2
+            return 1
+        fi
     done
 }
 
