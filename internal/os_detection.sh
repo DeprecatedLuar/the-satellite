@@ -115,7 +115,7 @@ detect_distro_family() {
         fedora | rhel | centos | rocky | alma)
             echo "rhel"
             ;;
-        alpine)
+        alpine | postmarketos)
             echo "alpine"
             ;;
         gentoo)
