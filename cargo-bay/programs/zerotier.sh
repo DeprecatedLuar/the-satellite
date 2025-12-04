@@ -9,6 +9,38 @@ OS=$(detect_os)
 DISTRO=$(detect_distro "$OS")
 FAMILY=$(detect_distro_family "$DISTRO")
 
+# Setup service based on init system
+setup_service() {
+    if [ -d /run/systemd/system ]; then
+        sudo tee /etc/systemd/system/zerotier-one.service > /dev/null << 'EOF'
+[Unit]
+Description=ZeroTier One
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/sbin/zerotier-one
+Restart=always
+RestartSec=5
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target
+EOF
+        sudo systemctl daemon-reload
+        sudo systemctl enable zerotier-one
+        sudo systemctl start zerotier-one
+
+    elif [ -f /sbin/openrc ]; then
+        sudo rc-update add zerotier-one default 2>/dev/null || true
+        sudo rc-service zerotier-one start
+
+    else
+        sudo zerotier-one -d
+    fi
+}
+
 action "Installing zerotier-one..."
 
 case "$DISTRO" in
@@ -17,56 +49,50 @@ case "$DISTRO" in
         ;;
     *)
         case "$FAMILY" in
-            debian) sudo apt install -y zerotier-one ;;
-            alpine)
-                action "Downloading static ZeroTier binary..."
-
-                ARCH=$(uname -m)
-                case "$ARCH" in
-                    x86_64)         ARCH_NAME="x86_64" ;;
-                    aarch64|arm64)  ARCH_NAME="aarch64" ;;
-                    *)              error "Unsupported architecture: $ARCH" ;;
-                esac
-
-                # Get latest version from CrystalIDEA releases
-                VERSION=$(curl -sSL "https://api.github.com/repos/crystalidea/zerotier-linux-binaries/releases/latest" \
-                    | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
-
-                curl -fsSL -o /tmp/zerotier.tar.gz \
-                    "https://github.com/crystalidea/zerotier-linux-binaries/releases/download/${VERSION}/zerotier_${ARCH_NAME}_${VERSION}.tar.gz"
-
-                tar -xzf /tmp/zerotier.tar.gz -C /tmp
-                rm /tmp/zerotier.tar.gz
-
-                sudo mv /tmp/zerotier-one /usr/local/bin/
-                sudo ln -sf /usr/local/bin/zerotier-one /usr/local/bin/zerotier-cli
-
-                # TUN module
-                sudo modprobe tun 2>/dev/null || true
-                grep -q "^tun$" /etc/modules 2>/dev/null || echo "tun" | sudo tee -a /etc/modules >/dev/null
-
-                # systemd service
-                sudo tee /etc/systemd/system/zerotier-one.service >/dev/null <<'EOF'
-[Unit]
-Description=ZeroTier One
-After=network-online.target
-Wants=network-online.target
-
-[Service]
-ExecStart=/usr/local/bin/zerotier-one
-Restart=on-failure
-RestartSec=5
-
-[Install]
-WantedBy=multi-user.target
-EOF
-                sudo systemctl daemon-reload
-                sudo systemctl enable zerotier-one
-                sudo systemctl start zerotier-one
+            debian)
+                curl -fsSL https://install.zerotier.com | sudo bash
                 ;;
-            arch)   sudo pacman -S --noconfirm zerotier-one ;;
-            rhel)   sudo dnf install -y zerotier-one ;;
-            *)      error "Unsupported system: $DISTRO ($FAMILY)" ;;
+            alpine)
+                (
+                    cd /tmp
+                    mkdir -p zerotier-build && cd zerotier-build
+
+                    sudo apk add --no-cache git make gcc g++ linux-headers openssl-dev curl
+
+                    # Install Rust if not present
+                    if ! command -v cargo &>/dev/null; then
+                        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+                        source "$HOME/.cargo/env"
+                    fi
+
+                    # TUN module
+                    sudo modprobe tun 2>/dev/null || true
+                    grep -q "^tun$" /etc/modules 2>/dev/null || echo "tun" | sudo tee -a /etc/modules >/dev/null
+
+                    # Build
+                    git clone --depth 1 https://github.com/zerotier/ZeroTierOne.git
+                    cd ZeroTierOne
+                    make -j$(nproc) ZT_SSO_SUPPORTED=0
+                    sudo make install ZT_SSO_SUPPORTED=0
+
+                    # Cleanup
+                    cd /
+                    rm -rf /tmp/zerotier-build
+                )
+
+                setup_service
+                ;;
+            arch)
+                sudo pacman -S --noconfirm zerotier-one
+                sudo systemctl enable --now zerotier-one
+                ;;
+            rhel)
+                sudo dnf install -y zerotier-one
+                sudo systemctl enable --now zerotier-one
+                ;;
+            *)
+                error "Unsupported system: $DISTRO ($FAMILY)"
+                ;;
         esac
         ;;
 esac
