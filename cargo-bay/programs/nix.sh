@@ -22,7 +22,8 @@ case "$DISTRO" in
         ;;
     *)
         # Use official installer - handles channels and setup properly
-        if pidof systemd &>/dev/null; then
+        # Check for actual systemd init (not just any systemd process)
+        if [[ -d /run/systemd/system ]]; then
             info "Multi-user install (systemd)"
             curl -L https://nixos.org/nix/install | sh -s -- --daemon
         else
