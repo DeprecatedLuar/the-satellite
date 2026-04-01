@@ -108,6 +108,14 @@ build_from_source() {
             error "Failed to clone repository"
         fi
 
+        # If repo has install.sh, use it instead of build cmd
+        if [ -f "install.sh" ]; then
+            bash install.sh
+            cd "$OLDPWD"
+            rm -rf "$temp_dir"
+            return 0
+        fi
+
         eval "$build_cmd"
 
         if [ $? -ne 0 ]; then
