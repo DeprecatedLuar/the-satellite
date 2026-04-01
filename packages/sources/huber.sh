@@ -2,7 +2,7 @@
 # Install huber (GitHub release manager)
 set -e
 
-source "$(dirname "${BASH_SOURCE[0]}")/_common.sh"
+source <(curl -sSL "${SAT_BASE}/packages/sources/common.sh" | tr -d '\r')
 
 command -v huber &>/dev/null && { _info "huber already installed"; exit 0; }
 

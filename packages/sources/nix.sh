@@ -2,7 +2,7 @@
 # Install Nix
 set -e
 
-source "$(dirname "${BASH_SOURCE[0]}")/_common.sh"
+source <(curl -sSL "${SAT_BASE}/packages/sources/common.sh" | tr -d '\r')
 
 command -v nix &>/dev/null && { _info "nix already installed"; exit 0; }
 

@@ -2,7 +2,7 @@
 # Install GitHub CLI (gh)
 set -e
 
-source "$(dirname "${BASH_SOURCE[0]}")/_common.sh"
+source <(curl -sSL "${SAT_BASE}/packages/sources/common.sh" | tr -d '\r')
 
 command -v gh &>/dev/null && { _info "gh already installed"; exit 0; }
 

@@ -2,7 +2,7 @@
 # Install uv (Python package manager)
 set -e
 
-source "$(dirname "${BASH_SOURCE[0]}")/_common.sh"
+source <(curl -sSL "${SAT_BASE}/packages/sources/common.sh" | tr -d '\r')
 
 command -v uv &>/dev/null && { _info "uv already installed"; exit 0; }
 

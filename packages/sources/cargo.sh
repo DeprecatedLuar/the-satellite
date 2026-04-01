@@ -2,7 +2,7 @@
 # Install Rust/Cargo via rustup
 set -e
 
-source "$(dirname "${BASH_SOURCE[0]}")/_common.sh"
+source <(curl -sSL "${SAT_BASE}/packages/sources/common.sh" | tr -d '\r')
 
 command -v cargo &>/dev/null && { _info "cargo already installed"; exit 0; }
 
