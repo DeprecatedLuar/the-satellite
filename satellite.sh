@@ -31,6 +31,17 @@ case "$1" in
         run_update_check "$2" "$3" "$4"
         ;;
     install)
+        # Shorthand: satellite.sh install user/repo [install_dir]
+        if [[ "$2" == *"/"* ]]; then
+            IFS='/' read -r REPO_USER REPO_NAME <<< "$2"
+            BINARY_NAME="$REPO_NAME"
+            PROJECT_NAME="$REPO_NAME"
+            INSTALL_DIR="${3:-$HOME/.local/bin}"
+            BUILD_CMD="go build -ldflags='-s -w' -o ${BINARY_NAME} ./cmd/${BINARY_NAME}"
+            ASCII_ART=""
+            MSG_FINAL=""
+            NEXT_STEPS_STR=""
+        else
         # Usage: satellite.sh install <project_name> <binary_name> <repo_user> <repo_name> <install_dir> <build_cmd> [ascii_art] [msg_final] [next_steps]
         PROJECT_NAME="$2"
         BINARY_NAME="$3"
@@ -43,6 +54,7 @@ case "$1" in
         ASCII_ART="${8:-}"
         MSG_FINAL="${9:-}"
         NEXT_STEPS_STR="${10:-}"
+        fi
 
         # Detect OS and architecture
         SYSTEM_INFO=$(get_system_info)
