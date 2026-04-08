@@ -31,10 +31,14 @@ case "$1" in
         run_update_check "$2" "$3" "$4"
         ;;
     install)
-        # Shorthand: satellite.sh install user/repo [install_dir]
+        # Shorthand: satellite.sh install user/repo[:binary] [install_dir]
         if [[ "$2" == *"/"* ]]; then
-            IFS='/' read -r REPO_USER REPO_NAME <<< "$2"
-            BINARY_NAME="$REPO_NAME"
+            local repo_arg="${2%%:*}"   # user/repo (strip :binary if present)
+            local binary_arg="${2##*:}" # binary name (or same as repo_arg if no colon)
+            [[ "$binary_arg" == "$2" ]] && binary_arg=""  # no colon → empty
+
+            IFS='/' read -r REPO_USER REPO_NAME <<< "$repo_arg"
+            BINARY_NAME="${binary_arg:-$REPO_NAME}"
             PROJECT_NAME="$REPO_NAME"
             INSTALL_DIR="${3:-$HOME/.local/bin}"
             BUILD_CMD="go build -ldflags='-s -w' -o ${BINARY_NAME} ./cmd/${BINARY_NAME}"
