@@ -79,6 +79,59 @@ try_download_binary() {
         fi
     done
 
+    # Fallback: scan actual release assets for OS/arch match
+    local asset_urls
+    asset_urls=$(curl -s "https://api.github.com/repos/$repo_user/$repo_name/releases/latest" \
+        | grep '"browser_download_url":' \
+        | sed -E 's/.*"([^"]+)".*/\1/')
+
+    for asset_url in $asset_urls; do
+        local asset_filename
+        asset_filename=$(basename "$asset_url")
+
+        # Skip checksums, signatures, etc.
+        [[ "$asset_filename" == *.sha256 ]] && continue
+        [[ "$asset_filename" == *.sig ]]    && continue
+        [[ "$asset_filename" == *.asc ]]    && continue
+
+        if [[ "$asset_filename" == *"$os"* ]] && [[ "$asset_filename" == *"$arch"* ]]; then
+            local tmp_archive="/tmp/satellite-asset-$$"
+            if curl -fsSL -o "$tmp_archive" "$asset_url" 2>/dev/null; then
+                if [[ "$asset_filename" == *.tar.gz ]]; then
+                    local extract_dir="/tmp/satellite-extract-$$"
+                    mkdir -p "$extract_dir"
+                    tar -xzf "$tmp_archive" -C "$extract_dir"
+                    local found_bin
+                    found_bin=$(find "$extract_dir" -type f -executable | head -1)
+                    if [ -n "$found_bin" ]; then
+                        mv "$found_bin" "./$binary_name"
+                        chmod +x "./$binary_name"
+                        rm -rf "$extract_dir" "$tmp_archive"
+                        return 0
+                    fi
+                    rm -rf "$extract_dir" "$tmp_archive"
+                elif [[ "$asset_filename" == *.zip ]]; then
+                    local extract_dir="/tmp/satellite-extract-$$"
+                    mkdir -p "$extract_dir"
+                    unzip -q "$tmp_archive" -d "$extract_dir"
+                    local found_bin
+                    found_bin=$(find "$extract_dir" -type f -executable | head -1)
+                    if [ -n "$found_bin" ]; then
+                        mv "$found_bin" "./$binary_name"
+                        chmod +x "./$binary_name"
+                        rm -rf "$extract_dir" "$tmp_archive"
+                        return 0
+                    fi
+                    rm -rf "$extract_dir" "$tmp_archive"
+                else
+                    mv "$tmp_archive" "./$binary_name"
+                    chmod +x "./$binary_name"
+                    return 0
+                fi
+            fi
+        fi
+    done
+
     warn "No release binary found, building from source..."
     return 1
 }
