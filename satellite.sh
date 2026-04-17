@@ -33,8 +33,8 @@ case "$1" in
     install)
         # Shorthand: satellite.sh install user/repo[:binary] [install_dir]
         if [[ "$2" == *"/"* ]]; then
-            local repo_arg="${2%%:*}"   # user/repo (strip :binary if present)
-            local binary_arg="${2##*:}" # binary name (or same as repo_arg if no colon)
+            repo_arg="${2%%:*}"   # user/repo (strip :binary if present)
+            binary_arg="${2##*:}" # binary name (or same as repo_arg if no colon)
             [[ "$binary_arg" == "$2" ]] && binary_arg=""  # no colon → empty
 
             IFS='/' read -r REPO_USER REPO_NAME <<< "$repo_arg"
