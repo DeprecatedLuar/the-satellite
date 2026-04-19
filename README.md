@@ -1,6 +1,8 @@
 # the-satellite
 
-The remote backend powering update checks and binary distribution for my CLI tools.
+Hi, basically if you found this probably was from a install line of one of my tools. 
+
+The satellite is a repo with a ton of remote execution utilities but most important it has an installation pipeline so I dont have to make nor update install scripts on my tools basically.
 
 ## What it is
 
@@ -10,7 +12,6 @@ Satellite sits between my CLI tools and GitHub releases, handling:
 - **Installer delivery** — serving and executing `install.sh` scripts
 - **Package management** — managing packages and cargo-bay sources
 
-It's not something you install manually — it's the infrastructure my tools talk to under the hood.
 
 ## Structure
 
