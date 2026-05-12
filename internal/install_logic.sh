@@ -19,6 +19,14 @@ try_download_binary() {
     local os="$4"
     local arch="$5"
 
+    # Termux requires PIE binaries - most GitHub releases don't provide Android-compatible binaries
+    # Force build from source to ensure proper compilation for Android
+    local distro=$(detect_distro "$os")
+    if [[ "$distro" == "termux" ]]; then
+        warn "Termux detected - building from source for Android compatibility..."
+        return 1
+    fi
+
     # Try GitHub releases first
     local latest_release=$(curl -s "https://api.github.com/repos/$repo_user/$repo_name/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/' || echo "")
 
