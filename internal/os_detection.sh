@@ -102,31 +102,36 @@ detect_distro() {
 detect_distro_family() {
     local distro="$1"
 
+    # Special case: NixOS first
+    [[ "$distro" == "nixos" ]] && { echo "nixos"; return; }
+
+    # Try ID_LIKE from /etc/os-release (derivatives specify their base here)
+    local id_like
+    id_like=$(parse_os_release "ID_LIKE")
+
+    if [[ -n "$id_like" ]]; then
+        # ID_LIKE can be space-separated list, check each
+        for base in $id_like; do
+            case "$base" in
+                arch) echo "arch"; return ;;
+                debian) echo "debian"; return ;;
+                fedora|rhel) echo "rhel"; return ;;
+                alpine) echo "alpine"; return ;;
+                gentoo) echo "gentoo"; return ;;
+                opensuse|suse) echo "suse"; return ;;
+            esac
+        done
+    fi
+
+    # Fallback: direct ID matching for base distros (no ID_LIKE)
     case "$distro" in
-        nixos)
-            echo "nixos"
-            ;;
-        ubuntu | debian | pop | linuxmint | raspbian)
-            echo "debian"
-            ;;
-        arch | manjaro | endeavouros)
-            echo "arch"
-            ;;
-        fedora | rhel | centos | rocky | alma)
-            echo "rhel"
-            ;;
-        alpine | postmarketos)
-            echo "alpine"
-            ;;
-        gentoo)
-            echo "gentoo"
-            ;;
-        opensuse* | sles)
-            echo "suse"
-            ;;
-        *)
-            echo "unknown"
-            ;;
+        ubuntu | debian) echo "debian" ;;
+        arch) echo "arch" ;;
+        fedora | rhel | centos) echo "rhel" ;;
+        alpine) echo "alpine" ;;
+        gentoo) echo "gentoo" ;;
+        opensuse* | sles) echo "suse" ;;
+        *) echo "unknown" ;;
     esac
 }
 
